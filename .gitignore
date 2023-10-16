@@ -1,0 +1,8 @@
+# Ignore .out files
+*.out
+
+# Ignore Vim temporary files
+*.sw[a-z]
+*.swo
+*.swn
+*.swp
