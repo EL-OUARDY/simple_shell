@@ -37,4 +37,12 @@ char **new_env);
 void print_env(char **command, char **argv, int *status, int idx,
 char **new_env);
 
+/* 08-builtins2.c */
+void _setenv(char **command, char **argv, int *status, int idx,
+char **new_env);
+void _unsetenv(char **command, char **argv, int *status, int idx,
+char **new_env);
+void change_directory(char **command, char **argv, int *status, int idx,
+char **new_env);
+
 #endif
