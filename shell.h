@@ -24,4 +24,17 @@ char *_strdup(const char *str);
 /* cleanup functions */
 void free_array(char **array, int length);
 
+/*  getpath.c  */
+list_dir *build_dir_list(void);
+char *_getpath(char *command);
+
+/*  bultins.c  */
+int is_builtin(char *command);
+void handle_builtin(char **command, char **argv, int *status, int idx,
+char **new_env);
+void exit_shell(char **command, char **argv, int *status, int idx,
+char **new_env);
+void print_env(char **command, char **argv, int *status, int idx,
+char **new_env);
+
 #endif
