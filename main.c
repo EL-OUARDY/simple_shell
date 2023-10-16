@@ -2,76 +2,44 @@
 
 /**
  * main - starting point
- * @ac: arguments count
- * @av: array of arguments
+ * @ac: argument count
+ * @av: argument vector
  * Return: integer
  */
 int main(int ac __attribute__((unused)), char **av)
 {
-	pid_t child_pid;
-	char *command, **args;
 	size_t cmd_length;
-	int read_bytes, args_count;
+	int read_bytes;
+	char *user_command = NULL;
+	shell_info_t info; /* shell info */
+
+	info.program_name = av[0]; /* save program name */
+	info.prompt_number = 0;    /* initialize prompt counter */
 
 	while (1)
 	{
-		print_string("$ ");
-		read_bytes = getline(&command, &cmd_length, stdin);
+		print_shell_prompt("$ ");
+		read_bytes = getline(&user_command, &cmd_length, stdin);
 
 		/* handle the “end of file” condition */
 		if (read_bytes == -1)
-		{
-			break; /* Exit the loop and the program */
-		}
+			break; /* exit the loop and the program */
+
+		info.prompt_number++; /* increment prompt counter */
 
 		/* remove the newline character */
-		if (command[read_bytes - 1] == '\n')
-		{
-			command[read_bytes - 1] = '\0';
-		}
+		if (user_command[read_bytes - 1] == '\n')
+			user_command[read_bytes - 1] = '\0';
 
-		/* check if the command equal "exit" */
-		if (_strcmp(command, "exit") == 0)
-		{
-			break; /* Exit the loop and the program */
-		}
+		/* empty command */
+		if (_strlen(user_command) == 0)
+			continue; /* next iteration */
 
-		/* get command args count */
-		args_count = argument_count(command);
-
-		/* split command into command/args array */
-		args = split_command(command, args_count);
-
-		child_pid = fork(); /* fork a child process */
-
-		/* faild to create child process */
-		if (child_pid == -1)
-		{
-			perror(av[0]);
-			return (1);
-		}
-
-		if (child_pid == 0) /* child process */
-		{
-			if (execve(args[0], args, environ) == -1)
-			{
-				perror(av[0]);
-				return (1);
-			}
-		}
-		else
-		{ /* parent process */
-			int status;
-
-			waitpid(child_pid, &status, 0);
-		}
-
-		/* free arguments array */
-		free_array(args, args_count);
+		/* execute command */
+		process_command(user_command, &info);
 	}
 
-	/* free command variable */
-	free(command);
+	free(user_command); /* free command variable */
 
-	return (0);
+	return (EXIT_SUCCESS);
 }
