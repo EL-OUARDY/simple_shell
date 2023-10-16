@@ -20,6 +20,18 @@
 extern char **environ;
 
 /**
+ * struct builtin_s - builtin command struct
+ *
+ * @command: builtin command (ex: exit / cd / help / alias ...etc)
+ * @handler_func: The associated handler function
+ */
+typedef struct builtin_s
+{
+	char *command;
+	void (*handler_func)();
+} builtin_t;
+
+/**
  * struct shell_info_struct - hold all shell shared data
  *
  * @program_name: shell executable name
@@ -53,6 +65,20 @@ void execute_child_process(char *user_command, char **args, int args_count);
 char *validate_command(char *command);
 int is_command_exists(const char *path);
 char *command_fullpath(char *path, char *command);
+
+/* builtin function */
+int call_builtin_handler_func(
+		char *user_command,
+		char **args,
+		int args_count,
+		shell_info_t *info
+		);
+void handle_exit(
+		char *user_command,
+		char **args,
+		int args_count,
+		shell_info_t *info
+		);
 
 /* list functions */
 path_t *get_path_list();

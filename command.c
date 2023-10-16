@@ -15,13 +15,9 @@ void process_command(char *user_command, shell_info_t *info)
 	args_count = argument_count(user_command);
 	args = split_command(user_command, args_count);
 
-	/* check if the command equal "exit" */
-	if (_strcmp(args[0], "exit") == 0)
-	{
-		free(user_command);           /* free command variable */
-		free_array(args, args_count); /* free arguments array */
-		exit(0);                      /* exit the program */
-	}
+	/* handle builtin commands */
+	if (call_builtin_handler_func(user_command, args, args_count, info) == 1)
+		return; /* return, builtin executed */
 
 	/* check if the command exists in any PATH directories */
 	validated = validate_command(args[0]);
