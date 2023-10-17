@@ -86,6 +86,7 @@ char *_getenv(char *name);
 
 /* error functions */
 void command_not_found_error(shell_info_t *shell_info);
+void exit_illegal_number_error(shell_info_t *shell_info);
 
 /* string functions */
 void print_shell_prompt(char *str);
@@ -98,6 +99,8 @@ int _strncmp(const char *str1, const char *str2, size_t n);
 char *_strcpy(char *dest, char *src);
 char *_strcat(char *dest, char *src);
 char *int_to_string(int number);
+int is_numeric(const char *str);
+int _atoi(const char *str);
 
 /* cleanup functions */
 void free_array(char **array, int length);
@@ -107,3 +110,4 @@ void free_path_list(path_t **head);
 #define SHELL_INFO_INIT { NULL, 0, NULL, NULL, 0 }
 
 #endif
+

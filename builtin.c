@@ -40,11 +40,38 @@ int call_builtin_handler_func(shell_info_t *shell_info)
  */
 void handle_exit(shell_info_t *shell_info)
 {
-	/* free ressources */
-	free(shell_info->user_command);
-	free_array(shell_info->args, shell_info->args_count);
+	int status_code;
 
-	exit(0);                      /* exit the program */
+	if (shell_info->args_count > 1) /* arguments are passed */
+	{
+		status_code = _atoi(shell_info->args[1]); /* convert to number */
+
+		/* check if argument is a valid status code */
+		if (is_numeric(shell_info->args[1]) && status_code >= 0)
+		{
+			/* free ressources */
+			free(shell_info->user_command);
+			free_array(shell_info->args, shell_info->args_count);
+
+			exit(status_code); /* exit the program with user's status code */
+		}
+		else /* argument is NOT a valid status code */
+		{
+			/* Illegal number error message */
+			exit_illegal_number_error(shell_info);
+
+			/* free ressources */
+			free_array(shell_info->args, shell_info->args_count);
+		}
+	}
+	else /* no arguments are passed */
+	{
+		/* free ressources */
+		free(shell_info->user_command);
+		free_array(shell_info->args, shell_info->args_count);
+
+		exit(0); /* exit the program with (0) status code */
+	}
 }
 
 /**
@@ -70,3 +97,4 @@ void handle_env(shell_info_t *shell_info)
 	/* free ressources */
 	free_array(shell_info->args, shell_info->args_count);
 }
+
