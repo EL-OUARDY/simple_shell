@@ -36,11 +36,17 @@ typedef struct builtin_s
  *
  * @program_name: shell executable name
  * @prompt_number: count the user commands
+ * @user_command: string user command
+ * @args: arguments array
+ * @args_count: argument array's length
  */
 typedef struct shell_info_struct
 {
 	char *program_name;
 	int prompt_number;
+	char *user_command;
+	char **args;
+	int args_count;
 } shell_info_t;
 
 /**
@@ -57,28 +63,19 @@ typedef struct path_s
 
 /* argument functions */
 int argument_count(char *command);
-char **split_command(char *command, int args_count);
+char **split_command(shell_info_t *shell_info);
 
 /* command functions */
-void process_command(char *user_command, shell_info_t *info);
-void execute_child_process(char *user_command, char **args, int args_count);
+void process_command(shell_info_t *shell_info);
+void execute_child_process(shell_info_t *shell_info);
 char *validate_command(char *command);
 int is_command_exists(const char *path);
 char *command_fullpath(char *path, char *command);
 
 /* builtin function */
-int call_builtin_handler_func(
-		char *user_command,
-		char **args,
-		int args_count,
-		shell_info_t *info
-		);
-void handle_exit(
-		char *user_command,
-		char **args,
-		int args_count,
-		shell_info_t *info
-		);
+int call_builtin_handler_func(shell_info_t *shell_info);
+void handle_exit(shell_info_t *shell_info);
+void handle_env(shell_info_t *shell_info);
 
 /* list functions */
 path_t *get_path_list();
@@ -88,7 +85,7 @@ path_t *add_path_node(path_t **head, const char *path);
 char *_getenv(char *name);
 
 /* error functions */
-void command_not_found_error(char *command, shell_info_t *info);
+void command_not_found_error(shell_info_t *shell_info);
 
 /* string functions */
 void print_shell_prompt(char *str);
@@ -105,5 +102,8 @@ char *int_to_string(int number);
 /* cleanup functions */
 void free_array(char **array, int length);
 void free_path_list(path_t **head);
+
+/* shell info struct intializer */
+#define SHELL_INFO_INIT { NULL, 0, NULL, NULL, 0 }
 
 #endif

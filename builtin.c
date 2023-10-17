@@ -2,22 +2,16 @@
 
 /**
  * call_builtin_handler_func - call the right builtin function to execute
- * @user_command: command to execute
- * @args: arguments to the command
- * @args_count: number of arguments
- * @info: shell information
+ * @shell_info: shell information
  * Return: (1) success (0) not found
  */
-int call_builtin_handler_func(
-		char *user_command,
-		char **args,
-		int args_count,
-		shell_info_t *info)
+int call_builtin_handler_func(shell_info_t *shell_info)
 {
 	int index, array_size;
 
 	builtin_t builtins[] = {
 		{"exit", handle_exit},
+		{"env", handle_env},
 		/* add builtins here */
 	};
 
@@ -27,10 +21,10 @@ int call_builtin_handler_func(
 	/* loop over builtins array to find a match */
 	for (index = 0; index < array_size; index++)
 	{
-		if (strcmp(builtins[index].command, args[0]) == 0)
+		if (strcmp(builtins[index].command, shell_info->args[0]) == 0)
 		{
 			/* call the handler */
-			builtins[index].handler_func(user_command, args, args_count, info);
+			builtins[index].handler_func(shell_info);
 			return (1);
 		}
 	}
@@ -41,20 +35,38 @@ int call_builtin_handler_func(
 
 /**
  * handle_exit - handle builtin exit command
- * @user_command: command to execute
- * @args: arguments to the command
- * @args_count: number of arguments
- * @info: shell information
+ * @shell_info: shell information
  * Return: void
  */
-void handle_exit(
-		char *user_command,
-		char **args,
-		int args_count,
-		shell_info_t *info)
+void handle_exit(shell_info_t *shell_info)
 {
-	(void)info;
-	free(user_command);           /* free command variable */
-	free_array(args, args_count); /* free arguments array */
+	/* free ressources */
+	free(shell_info->user_command);
+	free_array(shell_info->args, shell_info->args_count);
+
 	exit(0);                      /* exit the program */
+}
+
+/**
+ * handle_env - handle builtin env command
+ * @shell_info: shell information
+ * Return: void
+ */
+void handle_env(shell_info_t *shell_info)
+{
+	int i = 0;
+
+	/* Loop through the environment variables */
+	while (environ[i])
+	{
+		/* Print the environment variable */
+		_print(environ[i], STDOUT_FILENO);
+		_putchar('\n', STDOUT_FILENO); /* new line */
+		_putchar(BUFFER_FLUSH, STDOUT_FILENO); /* flush buffer */
+
+		i++;
+	}
+
+	/* free ressources */
+	free_array(shell_info->args, shell_info->args_count);
 }

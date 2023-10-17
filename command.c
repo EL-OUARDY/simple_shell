@@ -2,54 +2,50 @@
 
 /**
  * process_command - handle different type of shell commands
- * @user_command: command string
- * @info: shell info struct
+ * @shell_info: shell info struct
  * Return: void
  */
-void process_command(char *user_command, shell_info_t *info)
+void process_command(shell_info_t *shell_info)
 {
-	char *validated, **args;
-	int args_count;
+	char *validated;
 
 	/* split command into command/args array */
-	args_count = argument_count(user_command);
-	args = split_command(user_command, args_count);
+	shell_info->args_count = argument_count(shell_info->user_command);
+	shell_info->args = split_command(shell_info);
 
 	/* handle builtin commands */
-	if (call_builtin_handler_func(user_command, args, args_count, info) == 1)
+	if (call_builtin_handler_func(shell_info) == 1)
 		return; /* return, builtin executed */
 
 	/* check if the command exists in any PATH directories */
-	validated = validate_command(args[0]);
+	validated = validate_command(shell_info->args[0]);
 
 	if (validated == NULL) /* command not found */
 	{
-		command_not_found_error(args[0], info);
-		free_array(args, args_count); /* free arguments array */
+		command_not_found_error(shell_info);
+		free_array(shell_info->args, shell_info->args_count); /* free arguments */
 		/* TODO: set status code */
 		return;
 	}
 	else
 	{
 		/* change command with the validated one */
-		free(args[0]);
-		args[0] = validated;
+		free(shell_info->args[0]);
+		shell_info->args[0] = validated;
 	}
 
 	/* run the command in a child process */
-	execute_child_process(user_command, args, args_count);
+	execute_child_process(shell_info);
 
-	free_array(args, args_count); /* free arguments array */
+	free_array(shell_info->args, shell_info->args_count); /* free arguments */
 }
 
 /**
  * execute_child_process - fork a child process to execute our shell command
- * @user_command: command string
- * @args: arguments array
- * @args_count: arguments count
+ * @shell_info: shell info struct
  * Return: void
  */
-void execute_child_process(char *user_command, char **args, int args_count)
+void execute_child_process(shell_info_t *shell_info)
 {
 	pid_t child_pid;
 
@@ -59,18 +55,18 @@ void execute_child_process(char *user_command, char **args, int args_count)
 	if (child_pid == -1)
 	{
 		perror("Error:");
-		free(user_command);           /* free command variable */
-		free_array(args, args_count); /* free arguments array */
+		free(shell_info->user_command);           /* free command variable */
+		free_array(shell_info->args, shell_info->args_count); /* free arguments */
 		exit(1);
 	}
 
 	if (child_pid == 0) /* child process */
 	{
-		if (execve(args[0], args, environ) == -1)
+		if (execve(shell_info->args[0], shell_info->args, environ) == -1)
 		{
 			perror("Error:");
-			free(user_command);           /* free command variable */
-			free_array(args, args_count); /* free arguments array */
+			free(shell_info->user_command);           /* free command variable */
+			free_array(shell_info->args, shell_info->args_count); /* free arguments */
 			if (errno == EACCES)
 				exit(126);
 			exit(1);
@@ -172,3 +168,4 @@ char *command_fullpath(char *path, char *command)
 
 	return (fullpath);
 }
+

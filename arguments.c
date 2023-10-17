@@ -29,23 +29,21 @@ int argument_count(char *command)
 
 /**
  * split_command - command string to array
- * @command: command with arguments
- * @args_count: number of arguments
- *
+ * @shell_info: shell information
  * Return: an array contains the arguments of a command
  * including the command itself
  */
-char **split_command(char *command, int args_count)
+char **split_command(shell_info_t *shell_info)
 {
 	char **args;
 	char *cmd, *token;
 	int i = 0;
 
 	/* copy command */
-	cmd = _strdup(command);
+	cmd = _strdup(shell_info->user_command);
 
 	/* allocate memory for command args */
-	args = malloc(sizeof(char *) * (args_count + 1));
+	args = malloc(sizeof(char *) * (shell_info->args_count + 1));
 
 	token = strtok(cmd, " ");
 	while (token)
@@ -61,4 +59,3 @@ char **split_command(char *command, int args_count)
 
 	return (args);
 }
-

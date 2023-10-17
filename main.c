@@ -11,10 +11,10 @@ int main(int ac __attribute__((unused)), char **av)
 	size_t cmd_length;
 	int read_bytes;
 	char *user_command = NULL;
-	shell_info_t info; /* shell info */
+	shell_info_t shell_info = SHELL_INFO_INIT; /* initialize shell info */
 
-	info.program_name = av[0]; /* save program name */
-	info.prompt_number = 0;    /* initialize prompt counter */
+	shell_info.program_name = av[0]; /* save program name */
+	shell_info.prompt_number = 0;    /* initialize prompt counter */
 
 	while (1)
 	{
@@ -25,7 +25,7 @@ int main(int ac __attribute__((unused)), char **av)
 		if (read_bytes == -1)
 			break; /* exit the loop and the program */
 
-		info.prompt_number++; /* increment prompt counter */
+		shell_info.prompt_number++; /* increment prompt counter */
 
 		/* remove the newline character */
 		if (user_command[read_bytes - 1] == '\n')
@@ -36,10 +36,12 @@ int main(int ac __attribute__((unused)), char **av)
 			continue; /* next iteration */
 
 		/* execute command */
-		process_command(user_command, &info);
+		shell_info.user_command = user_command;
+		process_command(&shell_info);
 	}
 
 	free(user_command); /* free command variable */
 
 	return (EXIT_SUCCESS);
 }
+
