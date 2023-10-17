@@ -109,8 +109,5 @@ void free_path_list(path_t **head);
 /* shell info struct intializer */
 #define SHELL_INFO_INIT { NULL, 0, NULL, NULL, 0 }
 
-/* 02-getline.c */
-char *_getline(void);
-
 #endif
 
