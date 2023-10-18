@@ -21,7 +21,7 @@ int main(int ac __attribute__((unused)), char **av)
 	{
 		if (isatty(STDIN_FILENO)) /* interactive mode */
 			print_shell_prompt("$ ");
-		read_bytes = getline(&user_command, &cmd_length, stdin);
+		read_bytes = _getline(&user_command, &cmd_length, 0);
 
 		/* handle the “end of file” condition */
 		if (read_bytes == -1)

@@ -119,6 +119,12 @@ void free_env_list(env_t **head);
 /* comment functions */
 void remove_comment(char *command);
 
+/* custom getline function */
+ssize_t _getline(char **lineptr, size_t *n, int fd);
+
+/* custom realloc function */
+void *_realloc(void *ptr, size_t size);
+
 /* string functions */
 void print_shell_prompt(char *str);
 void _print(const char *str, int fd);
