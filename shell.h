@@ -116,6 +116,9 @@ void free_array(char **array);
 void free_path_list(path_t **head);
 void free_env_list(env_t **head);
 
+/* comment functions */
+void remove_comment(char *command);
+
 /* string functions */
 void print_shell_prompt(char *str);
 void _print(const char *str, int fd);

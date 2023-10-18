@@ -4,7 +4,7 @@
  * argument_count - count command's arguments
  * @command: command with arguments
  *
- * Return: the counter of the arguments including command itself
+ * Return: counter of the arguments including command itself, (-1) for error
  */
 int argument_count(char *command)
 {
@@ -15,6 +15,12 @@ int argument_count(char *command)
 	cmd = _strdup(command);
 
 	token = strtok(cmd, " ");
+
+	if (token == NULL) /* spaces command */
+	{
+		free(cmd);
+		return (-1);
+	}
 	while (token)
 	{
 		count++;

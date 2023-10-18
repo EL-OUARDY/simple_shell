@@ -9,8 +9,13 @@ void process_command(shell_info_t *shell_info)
 {
 	char *validated;
 
+	/* remove comment from the command */
+	remove_comment(shell_info->user_command);
+
 	/* split command into command/args array */
 	shell_info->args_count = argument_count(shell_info->user_command);
+	if (shell_info->args_count == -1) /* spaces command */
+		return;
 	shell_info->args = split_command(shell_info);
 
 	/* handle builtin commands */
