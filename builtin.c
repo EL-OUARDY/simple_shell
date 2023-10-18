@@ -12,7 +12,9 @@ int call_builtin_handler_func(shell_info_t *shell_info)
 	builtin_t builtins[] = {
 		{"exit", handle_exit},
 		{"env", handle_env},
-		/* add builtins here */
+		{"setenv", handle_setenv},
+		{"unsetenv", handle_unsetenv},
+		/* builtins added here */
 	};
 
 	/* get builtins array size */
@@ -49,9 +51,8 @@ void handle_exit(shell_info_t *shell_info)
 		/* check if argument is a valid status code */
 		if (is_numeric(shell_info->args[1]) && status_code >= 0)
 		{
-			/* free ressources */
-			free(shell_info->user_command);
-			free_array(shell_info->args, shell_info->args_count);
+			/* free memory */
+			free_all_ressources(shell_info);
 
 			exit(status_code); /* exit the program with user's status code */
 		}
@@ -60,15 +61,14 @@ void handle_exit(shell_info_t *shell_info)
 			/* Illegal number error message */
 			exit_illegal_number_error(shell_info);
 
-			/* free ressources */
-			free_array(shell_info->args, shell_info->args_count);
+			/* free arguments array */
+			free_array(shell_info->args);
 		}
 	}
 	else /* no arguments are passed */
 	{
-		/* free ressources */
-		free(shell_info->user_command);
-		free_array(shell_info->args, shell_info->args_count);
+		/* free memory */
+		free_all_ressources(shell_info);
 
 		exit(0); /* exit the program with (0) status code */
 	}
@@ -81,20 +81,64 @@ void handle_exit(shell_info_t *shell_info)
  */
 void handle_env(shell_info_t *shell_info)
 {
-	int i = 0;
+	env_t *head;
 
 	/* Loop through the environment variables */
-	while (environ[i])
+	head = shell_info->env;
+	while (head != NULL)
 	{
 		/* Print the environment variable */
-		_print(environ[i], STDOUT_FILENO);
-		_putchar('\n', STDOUT_FILENO); /* new line */
+		_print(head->variable, STDOUT_FILENO);
+		_putchar('\n', STDOUT_FILENO);		   /* new line */
 		_putchar(BUFFER_FLUSH, STDOUT_FILENO); /* flush buffer */
 
-		i++;
+		head = head->next;
 	}
 
-	/* free ressources */
-	free_array(shell_info->args, shell_info->args_count);
+	/* free arguments array */
+	free_array(shell_info->args);
 }
 
+/**
+ * handle_setenv - handle builtin setenv command
+ * @shell_info: shell information
+ * Description: FORMAT: setenv {variable_name} {variable_value}
+ * Return: void
+ */
+void handle_setenv(shell_info_t *shell_info)
+{
+	if (shell_info->args_count != 3)
+	{
+		custom_error_message("invalid number of arguments\n", shell_info);
+	}
+	else
+	{
+		/* set or update env variable */
+		_setenv(shell_info->args[1], shell_info->args[2], shell_info);
+	}
+
+	/* free arguments array */
+	free_array(shell_info->args);
+}
+
+/**
+ * handle_unsetenv - handle builtin unsetenv command
+ * @shell_info: shell information
+ * Description: FORMAT: unsetenv {variable_name}
+ * Return: void
+ */
+void handle_unsetenv(shell_info_t *shell_info)
+{
+	if (shell_info->args_count != 2)
+	{
+		custom_error_message("invalid number of arguments\n", shell_info);
+	}
+	/* remove env variable */
+	else if (_unsetenv(shell_info->args[1], shell_info) == -1)
+	{
+		custom_error_message("environement variable not found\n", shell_info);
+	}
+
+	/* free arguments array */
+	free_array(shell_info->args);
+}

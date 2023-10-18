@@ -14,7 +14,8 @@ int main(int ac __attribute__((unused)), char **av)
 	shell_info_t shell_info = SHELL_INFO_INIT; /* initialize shell info */
 
 	shell_info.program_name = av[0]; /* save program name */
-	shell_info.prompt_number = 0;    /* initialize prompt counter */
+	shell_info.prompt_number = 0;	 /* initialize prompt counter */
+	populate_shell_env(&shell_info); /* initialize shell env */
 
 	while (1)
 	{
@@ -40,7 +41,8 @@ int main(int ac __attribute__((unused)), char **av)
 		process_command(&shell_info);
 	}
 
-	free(user_command); /* free command variable */
+	free(user_command);				/* free command variable */
+	free_env_list(&shell_info.env); /* free env list */
 
 	return (EXIT_SUCCESS);
 }

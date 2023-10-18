@@ -18,12 +18,13 @@ void process_command(shell_info_t *shell_info)
 		return; /* return, builtin executed */
 
 	/* check if the command exists in any PATH directories */
-	validated = validate_command(shell_info->args[0]);
+	validated = validate_command(shell_info);
 
 	if (validated == NULL) /* command not found */
 	{
 		command_not_found_error(shell_info);
-		free_array(shell_info->args, shell_info->args_count); /* free arguments */
+		/* free arguments array */
+		free_array(shell_info->args);
 		/* TODO: set status code */
 		return;
 	}
@@ -37,7 +38,8 @@ void process_command(shell_info_t *shell_info)
 	/* run the command in a child process */
 	execute_child_process(shell_info);
 
-	free_array(shell_info->args, shell_info->args_count); /* free arguments */
+	/* free arguments array */
+	free_array(shell_info->args);
 }
 
 /**
@@ -48,6 +50,7 @@ void process_command(shell_info_t *shell_info)
 void execute_child_process(shell_info_t *shell_info)
 {
 	pid_t child_pid;
+	char **env_array;
 
 	child_pid = fork(); /* fork a child process */
 
@@ -55,18 +58,21 @@ void execute_child_process(shell_info_t *shell_info)
 	if (child_pid == -1)
 	{
 		perror("Error:");
-		free(shell_info->user_command);           /* free command variable */
-		free_array(shell_info->args, shell_info->args_count); /* free arguments */
+		/* free memory */
+		free_all_ressources(shell_info);
 		exit(1);
 	}
 
 	if (child_pid == 0) /* child process */
 	{
-		if (execve(shell_info->args[0], shell_info->args, environ) == -1)
+		env_array = env_list_to_array(shell_info->env);
+
+		if (execve(shell_info->args[0], shell_info->args, env_array) == -1)
 		{
 			perror("Error:");
-			free(shell_info->user_command);           /* free command variable */
-			free_array(shell_info->args, shell_info->args_count); /* free arguments */
+			/* free memory */
+			free_all_ressources(shell_info);
+			free_array(env_array);
 			if (errno == EACCES)
 				exit(126);
 			exit(1);
@@ -83,22 +89,22 @@ void execute_child_process(shell_info_t *shell_info)
 
 /**
  * validate_command - validate the command
- * @command: command string
+ * @shell_info: shell info struct
  * Return: on success: if command exist return the fullpath command
  * on error : return NULL means command not exist
  */
-char *validate_command(char *command)
+char *validate_command(shell_info_t *shell_info)
 {
 	char *fullpath_cmd = NULL;
 	path_t *path_list = NULL, *head;
 
 	/* check if command is valid */
-	if (is_command_exists(command) == 1)
-		return (_strdup(command));
+	if (is_command_exists(shell_info->args[0]) == 1)
+		return (_strdup(shell_info->args[0]));
 
 	/* NOT exist */
 	/* convert path string to linked list */
-	path_list = get_path_list();
+	path_list = get_path_list(shell_info);
 
 	/* look in PATH directories */
 	head = path_list;
@@ -107,7 +113,7 @@ char *validate_command(char *command)
 	{
 		char *current_path = head->path;
 
-		fullpath_cmd = command_fullpath(current_path, command);
+		fullpath_cmd = command_fullpath(current_path, shell_info->args[0]);
 
 		/* check if command is located in this directory */
 		if (is_command_exists(fullpath_cmd) == 1)
@@ -117,7 +123,7 @@ char *validate_command(char *command)
 		}
 
 		free(fullpath_cmd); /* free fullpath_cmd */
-		head = head->next;  /* check next directory */
+		head = head->next;	/* check next directory */
 	}
 
 	/* free ressources */

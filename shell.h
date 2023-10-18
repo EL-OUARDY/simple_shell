@@ -32,24 +32,6 @@ typedef struct builtin_s
 } builtin_t;
 
 /**
- * struct shell_info_struct - hold all shell shared data
- *
- * @program_name: shell executable name
- * @prompt_number: count the user commands
- * @user_command: string user command
- * @args: arguments array
- * @args_count: argument array's length
- */
-typedef struct shell_info_struct
-{
-	char *program_name;
-	int prompt_number;
-	char *user_command;
-	char **args;
-	int args_count;
-} shell_info_t;
-
-/**
  * struct path_s - path struct
  *
  * @path: string path
@@ -61,6 +43,38 @@ typedef struct path_s
 	struct path_s *next;
 } path_t;
 
+/**
+ * struct env_s - environement struct
+ *
+ * @variable: string - env variable
+ * @next: points to the next node
+ */
+typedef struct env_s
+{
+	char *variable;
+	struct env_s *next;
+} env_t;
+
+/**
+ * struct shell_info_struct - hold all shell shared data
+ *
+ * @program_name: shell executable name
+ * @prompt_number: count the user commands
+ * @user_command: string user command
+ * @args: arguments array
+ * @args_count: argument array's length
+ * @env: environement list
+ */
+typedef struct shell_info_struct
+{
+	char *program_name;
+	int prompt_number;
+	char *user_command;
+	char **args;
+	int args_count;
+	env_t *env;
+} shell_info_t;
+
 /* argument functions */
 int argument_count(char *command);
 char **split_command(shell_info_t *shell_info);
@@ -68,7 +82,7 @@ char **split_command(shell_info_t *shell_info);
 /* command functions */
 void process_command(shell_info_t *shell_info);
 void execute_child_process(shell_info_t *shell_info);
-char *validate_command(char *command);
+char *validate_command(shell_info_t *shell_info);
 int is_command_exists(const char *path);
 char *command_fullpath(char *path, char *command);
 
@@ -76,17 +90,31 @@ char *command_fullpath(char *path, char *command);
 int call_builtin_handler_func(shell_info_t *shell_info);
 void handle_exit(shell_info_t *shell_info);
 void handle_env(shell_info_t *shell_info);
+void handle_setenv(shell_info_t *shell_info);
+void handle_unsetenv(shell_info_t *shell_info);
 
 /* list functions */
-path_t *get_path_list();
+path_t *get_path_list(shell_info_t *shell_info);
 path_t *add_path_node(path_t **head, const char *path);
+env_t *add_env_node(env_t **head, const char *variable);
+char **env_list_to_array(env_t *head);
 
 /* environement functions */
-char *_getenv(char *name);
+void populate_shell_env(shell_info_t *shell_info);
+char *_getenv(char *name, shell_info_t *shell_info);
+void _setenv(char *name, char *value, shell_info_t *shell_info);
+int _unsetenv(char *name, shell_info_t *shell_info);
 
 /* error functions */
 void command_not_found_error(shell_info_t *shell_info);
 void exit_illegal_number_error(shell_info_t *shell_info);
+void custom_error_message(char *message, shell_info_t *shell_info);
+
+/* cleanup functions */
+void free_all_ressources(shell_info_t *shell_info);
+void free_array(char **array);
+void free_path_list(path_t **head);
+void free_env_list(env_t **head);
 
 /* string functions */
 void print_shell_prompt(char *str);
@@ -102,12 +130,10 @@ char *int_to_string(int number);
 int is_numeric(const char *str);
 int _atoi(const char *str);
 
-/* cleanup functions */
-void free_array(char **array, int length);
-void free_path_list(path_t **head);
-
 /* shell info struct intializer */
-#define SHELL_INFO_INIT { NULL, 0, NULL, NULL, 0 }
+#define SHELL_INFO_INIT          \
+{                              \
+	NULL, 0, NULL, NULL, 0, NULL \
+}
 
 #endif
-
