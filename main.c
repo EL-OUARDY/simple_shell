@@ -19,7 +19,8 @@ int main(int ac __attribute__((unused)), char **av)
 
 	while (1)
 	{
-		print_shell_prompt("$ ");
+		if (isatty(STDIN_FILENO)) /* interactive mode */
+			print_shell_prompt("$ ");
 		read_bytes = getline(&user_command, &cmd_length, stdin);
 
 		/* handle the “end of file” condition */
