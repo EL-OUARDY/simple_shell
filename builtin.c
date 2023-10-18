@@ -23,7 +23,7 @@ int call_builtin_handler_func(shell_info_t *shell_info)
 	/* loop over builtins array to find a match */
 	for (index = 0; index < array_size; index++)
 	{
-		if (strcmp(builtins[index].command, shell_info->args[0]) == 0)
+		if (_strcmp(builtins[index].command, shell_info->args[0]) == 0)
 		{
 			/* call the handler */
 			builtins[index].handler_func(shell_info);
