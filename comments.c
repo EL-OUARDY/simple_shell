@@ -8,14 +8,24 @@
 void remove_comment(char *command)
 {
 	int i = 0;
+	char prev = ' ', next = ' ';
 
 	/* place NULL termination at (#) sign */
 	for (i = 0; command[i] != '\0'; i++)
 	{
+		if (command[i + 1])
+			next = command[i + 1];
+		else
+			next = ' ';
 		if (command[i] == '#')
 		{
-			command[i] = '\0';
-			break;
+			/* check if (#) is not part of a word */
+			if (prev == ' ' || next == ' ')
+			{
+				command[i] = '\0';
+				break;
+			}
 		}
+		prev = command[i];
 	}
 }
