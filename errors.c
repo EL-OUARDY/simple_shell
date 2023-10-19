@@ -40,7 +40,7 @@ void exit_illegal_number_error(shell_info_t *shell_info)
 	_print(shell_info->args[1], STDERR_FILENO);
 	_putchar('\n', STDERR_FILENO); /* new line */
 	_putchar(BUFFER_FLUSH, STDERR_FILENO); /* flush buffer */
-	/* set "$?" variable value to 2*/
+	/* set "$?" variable value to 1 */
 
 	free(pn); /* free memory */
 }
@@ -62,7 +62,7 @@ void custom_error_message(char *message, shell_info_t *shell_info)
 	_print(": ", STDERR_FILENO);
 	_print(message, STDERR_FILENO);
 	_putchar(BUFFER_FLUSH, STDERR_FILENO); /* flush buffer */
-	/* set "$?" variable value to 2*/
+	/* set "$?" variable value to 1 */
 
 	free(pn); /* free memory */
 }

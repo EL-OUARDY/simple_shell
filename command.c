@@ -59,8 +59,7 @@ void execute_child_process(shell_info_t *shell_info)
 
 	child_pid = fork(); /* fork a child process */
 
-	/* faild to create child process */
-	if (child_pid == -1)
+	if (child_pid == -1) /* faild to create child process */
 	{
 		perror("Error:");
 		/* free memory */
@@ -80,7 +79,9 @@ void execute_child_process(shell_info_t *shell_info)
 			free_array(env_array);
 			if (errno == EACCES)
 				exit(126);
-			exit(1);
+			if (errno == ENOENT)
+				exit(127);
+			exit(EXIT_FAILURE);
 		}
 	}
 	else
@@ -88,7 +89,10 @@ void execute_child_process(shell_info_t *shell_info)
 		int status;
 
 		waitpid(child_pid, &status, 0);
-		/* set status code */
+		/* check child process status code */
+		if (WIFEXITED(status))
+			if (WEXITSTATUS(status) == 126)
+				custom_error_message("Permission denied\n", shell_info);
 	}
 }
 
